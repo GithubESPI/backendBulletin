@@ -63,10 +63,17 @@ async def fetch_api_data_for_template(headers):
     api_data_futures = [fetch_api_data(url, headers) for url in api_urls]
     results = await asyncio.gather(*api_data_futures, return_exceptions=True)
 
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            logger.error(f"API request failed for {api_urls[i]}: {result}")
+        else:
+            logger.debug(f"API response from {api_urls[i]}: {result}")
+
     if any(isinstance(result, Exception) for result in results):
         raise HTTPException(status_code=500, detail="Failed to fetch API data")
 
     return results
+
 
 # Fonction pour extraire les appréciations depuis un document Word
 def extract_appreciations_from_word(word_path):
@@ -250,7 +257,7 @@ async def process_file(uploaded_wb, template_path, columns_config, websocket=Non
                 template_ws.cell(row=template_row, column=columns_config['code_apprenant_column_index_template']).value = apprenant_info.get('codeApprenant', 'N/A')
                 template_ws.cell(row=template_row, column=columns_config['date_naissance_column_index_template']).value = apprenant_info.get('dateNaissance', 'N/A')
                 if 'inscriptions' in apprenant_info and apprenant_info['inscriptions']:
-                    template_ws.cell(row=template_row, column=columns_config['nom_site_column_index_template']).value = apprenant_info['inscriptions'][0]['site'].get('nomSite', 'N/A')
+                    template_ws.cell(row=template_row, column=columns_config['nom_site_column_index_template']).value = apprenant_info['inscriptions']                    [0]['site'].get('nomSite', 'N/A')
 
                 code_groupe = apprenant_info.get('informationsCourantes', {}).get('codeGroupe', None)
                 if code_groupe and code_groupe in groupes_dict:
@@ -295,7 +302,6 @@ async def process_file(uploaded_wb, template_path, columns_config, websocket=Non
     except Exception as e:
         logger.error("Failed to process the file", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/upload-and-integrate-excel-and-word")
 async def upload_and_integrate(doc_urls: DocumentUrls):
@@ -432,7 +438,7 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
                 'code_apprenant_column_index_template': 1,
                 'date_naissance_column_index_template': 23,
                 'nom_site_column_index_template': 24,
-                'code_groupe_column_index_template': 25,
+                                'code_groupe_column_index_template': 25,
                 'nom_groupe_column_index_template': 26,
                 'etendu_groupe_column_index_template': 27,
                 'duree_justifie_column_index_template': 28,
@@ -549,7 +555,7 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
         output_path = os.path.join(settings.OUTPUT_DIR, f'{template_name}.xlsx')
         template_wb.save(output_path)
 
-        # Génération et importation des bulletins PDF
+        # Génération et création des bulletins PDF
         output_dir = os.path.join(settings.OUTPUT_DIR, 'bulletins')
         os.makedirs(output_dir, exist_ok=True)
         bulletin_paths = process_excel_file(output_path, output_dir)
@@ -561,28 +567,6 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
             if filename.endswith('.pdf')
         ]
 
-        import_errors = []
-        for pdf_bulletin_path in pdf_bulletin_paths:
-            try:
-                # Ajouter un log avant de traiter chaque bulletin
-                logger.info(f"Processing bulletin for apprenant {pdf_bulletin_path}")
-                
-                code_apprenant = extract_code_apprenant(pdf_bulletin_path)
-                if not code_apprenant:
-                    raise ValueError(f"codeApprenant not found in {pdf_bulletin_path}")
-                
-                logger.info(f"Extracted codeApprenant: {code_apprenant} from {pdf_bulletin_path}")
-
-                if not import_document_to_yparéo(pdf_bulletin_path, code_apprenant):
-                    raise ValueError(f"Failed to import document {pdf_bulletin_path}")
-
-            except Exception as import_exc:
-                logger.error(f"Failed to import bulletin {pdf_bulletin_path}", exc_info=True)
-                import_errors.append({
-                    "file": os.path.basename(pdf_bulletin_path),
-                    "error": str(import_exc)
-                })
-
         # Création d'un fichier ZIP avec les PDF générés
         zip_filename = os.path.join(settings.DOWNLOAD_DIR, 'bulletins.zip')
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
@@ -592,74 +576,132 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
         for bulletin_path in bulletin_paths:
             os.remove(bulletin_path)
 
-        if import_errors:
-            return JSONResponse(content={"message": "Bulletins PDF generated, but some failed to import", "errors": import_errors}, status_code=207)
-        else:
-            return JSONResponse(content={"message": "Bulletins PDF generated, imported to Yparéo, and zipped successfully", "zip_path": zip_filename})
-    
+        return JSONResponse(content={"message": "Bulletins PDF generated and zipped successfully", "zip_path": zip_filename})
+
     except Exception as e:
         logger.error("Failed to process the file and generate bulletins", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/generate-and-import-bulletins")
-async def generate_and_import_bulletins(file: UploadFile = File(...)):
-    try:
-        # Step 1: Save the uploaded file
-        temp_file_path = os.path.join(settings.UPLOAD_DIR, file.filename)
-        with open(temp_file_path, 'wb') as temp_file:
-            temp_file.write(await file.read())
 
-        # Step 2: Generate PDF bulletins from the Excel file
-        output_dir = os.path.join(settings.OUTPUT_DIR, 'bulletins')
-        os.makedirs(output_dir, exist_ok=True)
-        bulletin_paths = process_excel_file(temp_file_path, output_dir)
+@router.post("/import-bulletins-from-directory")
+async def import_bulletins_from_directory():
+    bulletin_dir = r"C:\Users\AndyVESPUCE\bulletin-espi\backend\outputs\bulletins"
 
-        # Convert all Word documents to PDF (Assuming process_excel_file generates Word docs)
-        convert(output_dir)
-        pdf_bulletin_paths = [
-            os.path.join(output_dir, filename.replace('.docx', '.pdf'))
-            for filename in os.listdir(output_dir)
-            if filename.endswith('.pdf')
-        ]
+    if not os.path.exists(bulletin_dir):
+        raise HTTPException(status_code=404, detail="Bulletin directory not found")
 
-        # Step 3: Import each PDF bulletin to Yparéo
-        import_errors = []
-        for pdf_bulletin_path in pdf_bulletin_paths:
-            try:
-                # Extract codeApprenant from the PDF
-                code_apprenant = extract_code_apprenant(pdf_bulletin_path)
-                if not code_apprenant:
-                    raise ValueError(f"codeApprenant not found in {pdf_bulletin_path}")
-                
-                logger.info(f"Extracted codeApprenant: {code_apprenant} from {pdf_bulletin_path}")
+    import_errors = []
 
-                if not import_document_to_yparéo(pdf_bulletin_path, code_apprenant):
-                    raise ValueError(f"Failed to import document {pdf_bulletin_path}")
+    for pdf_file in os.listdir(bulletin_dir):
+        if pdf_file.endswith('.pdf'):
+            pdf_path = os.path.join(bulletin_dir, pdf_file)
 
-            except Exception as import_exc:
-                logger.error(f"Failed to import bulletin {pdf_bulletin_path}", exc_info=True)
+            # Extraire le code apprenant depuis le PDF (Assurez-vous d'avoir la logique pour cela)
+            code_apprenant = extract_code_apprenant(pdf_path)
+            if not code_apprenant:
                 import_errors.append({
-                    "file": os.path.basename(pdf_bulletin_path),
-                    "error": str(import_exc)
+                    "file": os.path.basename(pdf_path),
+                    "error": "Failed to extract code_apprenant"
+                })
+                continue
+
+            try:
+                with open(pdf_path, 'rb') as file:
+                    file_content = file.read()
+                encoded_content = base64.b64encode(file_content).decode('utf-8')
+
+                payload = {
+                    "contenu": encoded_content,
+                    "nomDocument": os.path.basename(pdf_path),
+                    "typeMime": "application/pdf",
+                    "extension": "pdf",
+                }
+
+                endpoint = f"/r/v1/document/apprenant/{code_apprenant}/document?codeRepertoire=1000011"
+                url = f"{settings.YPAERO_BASE_URL}{endpoint}"
+                headers = {
+                    "X-Auth-Token": settings.YPAERO_API_TOKEN,
+                    "Content-Type": "application/json"
+                }
+
+                response = requests.post(url, headers=headers, json=payload)
+
+                if response.status_code != 200:
+                    import_errors.append({
+                        "file": os.path.basename(pdf_path),
+                        "error": response.text
+                    })
+            except Exception as e:
+                import_errors.append({
+                    "file": os.path.basename(pdf_path),
+                    "error": str(e)
                 })
 
-        # Step 4: Create a ZIP file with the PDF bulletins after import to Yparéo
-        zip_filename = os.path.join(settings.DOWNLOAD_DIR, 'bulletins.zip')
-        with zipfile.ZipFile(zip_filename, 'w') as zipf:
-            for pdf_path in pdf_bulletin_paths:
-                zipf.write(pdf_path, os.path.basename(pdf_path))
+    if import_errors:
+        return {"message": "Some bulletins failed to import", "errors": import_errors}
+    else:
+        return {"message": "All bulletins imported successfully"}
 
-        for bulletin_path in bulletin_paths:
-            os.remove(bulletin_path)
 
-        if import_errors:
-            return JSONResponse(content={"message": "Bulletins PDF generated, but some failed to import", "errors": import_errors}, status_code=207)
-        else:
-            return JSONResponse(content={"message": "Bulletins PDF generated, imported to Yparéo, and zipped successfully", "zip_path": zip_filename})
+# @router.post("/generate-and-import-bulletins")
+# async def generate_and_import_bulletins(file: UploadFile = File(...)):
+#     try:
+#         # Step 1: Save the uploaded file
+#         temp_file_path = os.path.join(settings.UPLOAD_DIR, file.filename)
+#         with open(temp_file_path, 'wb') as temp_file:
+#             temp_file.write(await file.read())
 
-    except Exception as e:
-        logger.error("Failed to generate and import bulletins", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+#         # Step 2: Generate PDF bulletins from the Excel file
+#         output_dir = os.path.join(settings.OUTPUT_DIR, 'bulletins')
+#         os.makedirs(output_dir, exist_ok=True)
+#         bulletin_paths = process_excel_file(temp_file_path, output_dir)
+
+#         # Convert all Word documents to PDF (Assuming process_excel_file generates Word docs)
+#         convert(output_dir)
+#         pdf_bulletin_paths = [
+#             os.path.join(output_dir, filename.replace('.docx', '.pdf'))
+#             for filename in os.listdir(output_dir)
+#             if filename.endswith('.pdf')
+#         ]
+
+#         # Step 3: Import each PDF bulletin to Yparéo
+#         import_errors = []
+#         for pdf_bulletin_path in pdf_bulletin_paths:
+#             try:
+#                 # Extract codeApprenant from the PDF
+#                 code_apprenant = extract_code_apprenant(pdf_bulletin_path)
+#                 if not code_apprenant:
+#                     raise ValueError(f"codeApprenant not found in {pdf_bulletin_path}")
+                
+#                 logger.info(f"Extracted codeApprenant: {code_apprenant} from {pdf_bulletin_path}")
+
+#                 if not import_document_to_yparéo(pdf_bulletin_path, code_apprenant):
+#                     raise ValueError(f"Failed to import document {pdf_bulletin_path}")
+
+#             except Exception as import_exc:
+#                 logger.error(f"Failed to import bulletin {pdf_bulletin_path}", exc_info=True)
+#                 import_errors.append({
+#                     "file": os.path.basename(pdf_bulletin_path),
+#                     "error": str(import_exc)
+#                 })
+
+#         # Step 4: Create a ZIP file with the PDF bulletins after import to Yparéo
+#         zip_filename = os.path.join(settings.DOWNLOAD_DIR, 'bulletins.zip')
+#         with zipfile.ZipFile(zip_filename, 'w') as zipf:
+#             for pdf_path in pdf_bulletin_paths:
+#                 zipf.write(pdf_path, os.path.basename(pdf_path))
+
+#         for bulletin_path in bulletin_paths:
+#             os.remove(bulletin_path)
+
+#         if import_errors:
+#             return JSONResponse(content={"message": "Bulletins PDF generated, but some failed to import", "errors": import_errors}, status_code=207)
+#         else:
+#             return JSONResponse(content={"message": "Bulletins PDF generated, imported to Yparéo, and zipped successfully", "zip_path": zip_filename})
+
+#     except Exception as e:
+#         logger.error("Failed to generate and import bulletins", exc_info=True)
+#         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/download-zip/{filename}")
 async def download_zip(filename: str):
@@ -667,3 +709,4 @@ async def download_zip(filename: str):
     if not os.path.exists(zip_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path=zip_path, filename=filename, media_type='application/zip')
+
