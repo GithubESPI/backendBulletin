@@ -17,6 +17,19 @@ def normalize_string(s):
         s = str(s)
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').lower()
 
+
+def normalize_name(name):
+    """Normalise les noms pour comparaison."""
+    if not name:
+        return ""
+    # Supprimer les accents
+    name = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('utf-8')
+    # Convertir en majuscules
+    name = name.upper()
+    # Supprimer les espaces en début et fin
+    name = name.strip()
+    return name
+
 # Fonction pour traiter un fichier Excel
 def process_excel_file(file_path: str, output_dir: str) -> list:
     try:
@@ -167,27 +180,40 @@ def process_excel_file(file_path: str, output_dir: str) -> list:
         logger.error("Erreur lors du traitement du fichier Excel", exc_info=True)
         raise HTTPException(status_code=400, detail=f"Error processing Excel file: {e}")
 
-# Fonction pour extraire les appréciations d'un fichier Word
 def extract_appreciations_from_word(word_file_path):
+    import unicodedata
     import docx
     doc = docx.Document(word_file_path)
     appreciations = {}
+    
+    # Fonction de normalisation des chaînes de caractères
+    def normalize_string(s):
+        return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').upper().strip()
+    
     for para in doc.paragraphs:
         if para.text:
             parts = para.text.split(':')
             if len(parts) == 2:
                 name, appreciation = parts
-                appreciations[name.strip()] = appreciation.strip()
+                normalized_name = normalize_string(name)
+                appreciations[normalized_name] = appreciation.strip()
     return appreciations
 
-# Fonction pour mettre à jour un fichier Excel avec des appréciations
 def update_excel_with_appreciations(template_wb, appreciations, columns_config):
     template_ws = template_wb.active
-    appreciation_column_index = columns_config.get('appreciation_column_index_template', 31)  # Supposons que la colonne AE
+    appreciation_column_index = columns_config.get('appreciation_column_index_template', 31)  # Colonne par défaut AE
 
     for row in range(2, template_ws.max_row + 1):
         student_name = template_ws.cell(row=row, column=columns_config['name_column_index_template']).value
-        if student_name and student_name.upper() in appreciations:
-            template_ws.cell(row=row, column=appreciation_column_index).value = appreciations[student_name.upper()]
+        if student_name:
+            normalized_student_name = normalize_name(student_name)
+            
+            # Rechercher l'appréciation normalisée dans le dictionnaire
+            for key in appreciations.keys():
+                if normalize_name(key) == normalized_student_name:
+                    template_ws.cell(row=row, column=appreciation_column_index).value = appreciations[key]
+                    break
+            else:
+                print(f"Appreciation non trouvée pour: {student_name}")
 
     return template_wb

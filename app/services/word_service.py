@@ -1,6 +1,7 @@
 import logging
 import json
 from datetime import datetime
+from fastapi import HTTPException
 import pandas as pd
 from docxtpl import DocxTemplate
 from app.core.config import settings
@@ -10,8 +11,8 @@ import math
 import docx
 
 # Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 # Fonction pour lire la configuration des ECTS depuis un fichier JSON
 def read_ects_config():
@@ -73,6 +74,7 @@ def calculate_weighted_average(notes, ects):
 
 # Fonction pour générer les placeholders pour le document Word
 def generate_placeholders(titles_row, case_config, student_data, current_date, ects_data):
+    logger.debug(f"Received ECTS data: {ects_data}")
     placeholders = {
         "nomApprenant": student_data["Nom"],
         "etendugroupe": student_data["Étendu Groupe"],
@@ -96,12 +98,12 @@ def generate_placeholders(titles_row, case_config, student_data, current_date, e
             "matiere3": titles_row[3],
             "UE2_Title": titles_row[4],
             "matiere4": titles_row[5],
-            "matiere5": titles_row[6],
-            "UE3_Title": titles_row[7],
+            "UE3_Title": titles_row[6],
+            "matiere5": titles_row[7],
             "matiere6": titles_row[8],
-            "matiere7": titles_row[9],
-            "matiere8": titles_row[10],
-            "UE4_Title": titles_row[11],
+            "UE4_Title": titles_row[9],
+            "matiere7": titles_row[10],
+            "matiere8": titles_row[11],
             "matiere9": titles_row[12],
             "matiere10": titles_row[13],
             "matiere11": titles_row[14],
@@ -221,6 +223,83 @@ def generate_placeholders(titles_row, case_config, student_data, current_date, e
 
     return placeholders
 
+
+def calculate_ue_state(notes):
+    notes_between_8_and_10 = sum(8 <= note < 10 for note in notes)
+    notes_below_8 = sum(note < 8 for note in notes)
+
+    if all(note >= 10 for note in notes):
+        return "VA", ["" for _ in notes]
+    elif notes_between_8_and_10 == 1 and notes_below_8 == 0:
+        return "VA", ["C" if 8 <= note < 10 else "" for note in notes]
+    else:
+        states = []
+        for note in notes:
+            if note < 8:
+                states.append("R")
+            elif 8 <= note < 10:
+                states.append("R" if notes_below_8 > 0 or notes_between_8_and_10 > 1 else "C")
+            else:
+                states.append("")
+        return "NV", states
+
+# Modify the logic where "R" is assigned
+def process_ue_notes(placeholders, ue_name, note_indices, grade_column_indices, student_data, case_config):
+    ue_notes = []
+    
+    for i in note_indices:
+        grade_str = str(student_data.iloc[grade_column_indices[i-1]]).strip() if pd.notna(student_data.iloc[grade_column_indices[i-1]]) else ""
+        ects_value = placeholders.get(f"ECTS{i}", "")
+
+        # Check if note is empty and ECTS is either empty or hidden
+        if grade_str == "" and (ects_value == "" or i in case_config["hidden_ects"]):
+            placeholders[f"note{i}"] = ""
+            placeholders[f"etat{i}"] = ""
+            ue_notes.append(None)
+            continue
+
+        if grade_str and grade_str != 'Note':
+            grades_coefficients = extract_grades_and_coefficients(grade_str)
+            individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
+            if individual_average is not None:
+                ue_notes.append(individual_average)
+                placeholders[f"note{i}"] = f"{individual_average:.2f}" if individual_average else ""
+            else:
+                placeholders[f"note{i}"] = ""
+                ue_notes.append(None)
+        else:
+            placeholders[f"note{i}"] = ""
+            ue_notes.append(None)
+
+        # Initialize state to empty string
+        placeholders[f"etat{i}"] = ""
+
+    # Calculate UE state based on valid notes
+    valid_ue_notes = [note for note in ue_notes if note is not None]
+    
+    if valid_ue_notes:
+        notes_between_8_and_10 = sum(8 <= note < 10 for note in valid_ue_notes)
+        notes_below_8 = sum(note < 8 for note in valid_ue_notes)
+
+        if all(note >= 10 for note in valid_ue_notes):
+            placeholders[f"etat{ue_name}"] = "VA"
+        elif notes_between_8_and_10 == 1 and notes_below_8 == 0:
+            placeholders[f"etat{ue_name}"] = "VA"
+            for i, note in zip(note_indices, valid_ue_notes):
+                if 8 <= note < 10 and placeholders[f"note{i}"] != "" and (placeholders.get(f"ECTS{i}", "") != "" and i not in case_config["hidden_ects"]):
+                    placeholders[f"etat{i}"] = "C"
+        else:
+            placeholders[f"etat{ue_name}"] = "NV"
+            for i, note in zip(note_indices, valid_ue_notes):
+                if placeholders[f"note{i}"] != "" and (placeholders.get(f"ECTS{i}", "") != "" and i not in case_config["hidden_ects"]):
+                    if note < 8 or (notes_between_8_and_10 > 1 and notes_below_8 > 0):
+                        placeholders[f"etat{i}"] = "R"
+                    elif 8 <= note < 10:
+                        placeholders[f"etat{i}"] = "C"
+    else:
+        placeholders[f"etat{ue_name}"] = ""
+
+        
 # Fonction pour générer un document Word à partir des données de l'étudiant et du template
 def generate_word_document(student_data, case_config, template_path, output_dir):
     ects_config = read_ects_config()
@@ -243,6 +322,56 @@ def generate_word_document(student_data, case_config, template_path, output_dir)
     logger.debug(f"ECTS data for {corrected_key}: {ects_data}")
 
     placeholders = generate_placeholders(case_config["titles_row"], case_config, student_data, current_date, ects_data)
+
+    # New logic for M1-S1
+    if case_config["key"] == "M1_S1":
+        process_ue_notes(placeholders, "UE1", [1, 2, 3], case_config["grade_column_indices"], student_data, case_config)
+        process_ue_notes(placeholders, "UE2", [4], case_config["grade_column_indices"], student_data, case_config)
+        process_ue_notes(placeholders, "UE3", [5, 6], case_config["grade_column_indices"], student_data, case_config)
+        process_ue_notes(placeholders, "UE4", [7, 8, 9, 10, 11, 12], case_config["grade_column_indices"], student_data, case_config)
+        process_ue_notes(placeholders, "UESPE", [13, 14, 15], case_config["grade_column_indices"], student_data, case_config)
+
+        # Get UE1 notes, treating empty strings as None
+        ue1_notes = [float(placeholders[f"note{i}"]) if placeholders[f"note{i}"] and placeholders[f"note{i}"] != "" and i not in case_config["hidden_ects"] and placeholders.get(f"ECTS{i}", "") != "" else None for i in range(1, 4)]
+
+        # Initialize all states to empty string
+        placeholders["etatUE1"] = ""
+        for i in range(1, 4):
+            placeholders[f"etat{i}"] = ""
+
+        # Only process if there are any non-None values
+        if any(note is not None for note in ue1_notes):
+            # Count notes in different ranges, ignoring None values
+            notes_between_8_and_10 = sum(8 <= note < 10 for note in ue1_notes if note is not None)
+            notes_below_8 = sum(note < 8 for note in ue1_notes if note is not None)
+
+            # Determine UE1 state and individual states
+            if all(note >= 10 for note in ue1_notes if note is not None):
+                placeholders["etatUE1"] = "VA"
+            elif notes_between_8_and_10 == 1 and notes_below_8 == 0:
+                placeholders["etatUE1"] = "VA"
+                for i, note in enumerate(ue1_notes, start=1):
+                    if note is not None and 8 <= note < 10 and i not in case_config["hidden_ects"] and placeholders.get(f"ECTS{i}", "") != "":
+                        placeholders[f"etat{i}"] = "C"
+            else:
+                placeholders["etatUE1"] = "NV"
+                for i, note in enumerate(ue1_notes, start=1):
+                    if note is not None and i not in case_config["hidden_ects"] and placeholders.get(f"ECTS{i}", "") != "":
+                        if note < 8:
+                            placeholders[f"etat{i}"] = "R"
+                        elif 8 <= note < 10:
+                            placeholders[f"etat{i}"] = "R" if notes_below_8 > 0 or notes_between_8_and_10 > 1 else "C"
+                        else:
+                            placeholders[f"etat{i}"] = ""
+                    else:
+                        placeholders[f"etat{i}"] = ""
+        else:
+            # If all notes are None or empty, set all states to empty string
+            placeholders["etatUE1"] = ""
+            for i in range(1, 4):
+                placeholders[f"etat{i}"] = ""
+
+
 
     total_ects = 0  # Initialiser le total des ECTS
 
@@ -310,3 +439,4 @@ def generate_word_document(student_data, case_config, template_path, output_dir)
     output_filepath = os.path.join(output_dir, output_filename)
     doc.save(output_filepath)
     return output_filepath
+

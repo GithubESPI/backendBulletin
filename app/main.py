@@ -9,10 +9,11 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Ajouter le middleware CORS
+# Define the allowed origins, you can put `*` to allow all, or specify the domain
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Autorise toutes les origines
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

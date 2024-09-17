@@ -80,7 +80,7 @@ class Settings(BaseSettings):
         "P-M2 MIFIM ALT 1", "P-M2 MIFIM ALT 2", "P-M2 MIFIM ALT 3", "M-M2 MIFIM ALT",
         "MP-M2 MAGI ALT", "MP-M2 MAPI ALT 1", "MP-M2 MAPI ALT 2", "B-M2 2ESI ALT",
         "B-M2 MIFIM ALT", "B-M2 MAPI ALT 2", "L-M2 MIFIM ALT", "L-M2 2ESI ALT",
-        "P-M2 MAPI RP", "P-M2 MIFIM RP", "P-M2 MAGI RP", "CA-M2 MIFIM TP", "CA-M2 MAPI TP",
+        "P-M2 MAPI RP", "P-M2 MIFIM RP", "P-M2 MAGI RP", "CA-M2 MIFIM TP", "CA-M2 MAPI TP", "N-M2 MAGI ALT 1"
     ]
 
     # Paramètres d'API externe

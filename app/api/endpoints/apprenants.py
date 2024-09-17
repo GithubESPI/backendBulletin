@@ -6,7 +6,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_apprenants():
-    endpoint_apprenant = "/r/v1/formation-longue/apprenants?codesPeriode=2"
+    endpoint_apprenant = "/r/v1/formation-longue/apprenants?codePeriode=2"
     url_apprenant = f"{settings.YPAERO_BASE_URL}{endpoint_apprenant}"
     headers = {
         "X-Auth-Token": settings.YPAERO_API_TOKEN,
