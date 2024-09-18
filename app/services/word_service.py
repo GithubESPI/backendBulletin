@@ -29,8 +29,9 @@ def normalize_string(s):
 # Fonction pour extraire les notes et les coefficients depuis une chaîne de caractères
 def extract_grades_and_coefficients(grade_str):
     grades_coefficients = []
-    if not grade_str.strip():
-        return grades_coefficients  # Retourne une liste vide si la chaîne est vide
+    if not grade_str.strip() or "Validé" in grade_str:
+        return grades_coefficients  # Retourne une liste vide
+
     parts = grade_str.split(" - ")
     for part in parts:
         if "Absent au devoir" in part:
@@ -45,13 +46,13 @@ def extract_grades_and_coefficients(grade_str):
             grade = grade_part.replace(",", ".").strip()
             coefficient = coefficient_part.replace(",", ".").strip()
             
-            # Remplacer 'CCHM' par 1
-            if grade == 'CCHM':
+            if grade.lower() == 'cchm':
                 grade = '1'
+            elif not grade or float(grade) == 0:
+                continue  # Ignorer les notes vides ou nulles
             grades_coefficients.append((float(grade), float(coefficient)))
         except ValueError:
-            # Ignorer les valeurs qui ne peuvent pas être converties en float ou ne sont pas au format attendu
-            continue
+            continue  # Ignorer les valeurs non numériques
     return grades_coefficients
 
 # Fonction pour calculer la moyenne pondérée des notes
@@ -243,64 +244,132 @@ def calculate_ue_state(notes):
                 states.append("")
         return "NV", states
 
+def setup_targeted_logging(target_student_name):
+    class StudentFilter(logging.Filter):
+        def __init__(self, name):
+            super().__init__(name)
+            self.target_name = target_student_name.lower()
+            self.is_processing_target = False
+
+        def filter(self, record):
+            if "Processing student:" in record.getMessage():
+                self.is_processing_target = self.target_name in record.getMessage().lower()
+            return self.is_processing_target
+
+    logger = logging.getLogger('targeted_student')
+    logger.setLevel(logging.DEBUG)
+    handler = logging.FileHandler(f"{target_student_name.replace(' ', '_')}_logs.txt")
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    student_filter = StudentFilter(target_student_name)
+    logger.addFilter(student_filter)
+    return logger
+
+# Au début de votre script principal
+targeted_logger = setup_targeted_logging("CATELIN Vincianne")
+
 # Modify the logic where "R" is assigned
 def process_ue_notes(placeholders, ue_name, note_indices, grade_column_indices, student_data, case_config):
     ue_notes = []
+    ue_ects = []
+    valid_indices = []
     
     for i in note_indices:
         grade_str = str(student_data.iloc[grade_column_indices[i-1]]).strip() if pd.notna(student_data.iloc[grade_column_indices[i-1]]) else ""
         ects_value = placeholders.get(f"ECTS{i}", "")
 
-        # Check if note is empty and ECTS is either empty or hidden
-        if grade_str == "" and (ects_value == "" or i in case_config["hidden_ects"]):
-            placeholders[f"note{i}"] = ""
-            placeholders[f"etat{i}"] = ""
-            ue_notes.append(None)
-            continue
+        # Initialize state and note to empty string for all indices
+        placeholders[f"etat{i}"] = ""
+        placeholders[f"note{i}"] = ""
 
-        if grade_str and grade_str != 'Note':
+        # Process only if grade is not empty and ECTS is not hidden
+        if grade_str and grade_str != 'Note' and ects_value and i not in case_config["hidden_ects"]:
             grades_coefficients = extract_grades_and_coefficients(grade_str)
             individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
             if individual_average is not None:
                 ue_notes.append(individual_average)
-                placeholders[f"note{i}"] = f"{individual_average:.2f}" if individual_average else ""
-            else:
-                placeholders[f"note{i}"] = ""
-                ue_notes.append(None)
-        else:
-            placeholders[f"note{i}"] = ""
-            ue_notes.append(None)
+                ue_ects.append(float(ects_value))
+                placeholders[f"note{i}"] = f"{individual_average:.2f}"
+                valid_indices.append(i)
+                logging.debug(f"Valid note for index {i}: {individual_average:.2f}")
 
-        # Initialize state to empty string
+    # Calculate UE average
+    if ue_notes and ue_ects:
+        ue_average = sum(note * ects for note, ects in zip(ue_notes, ue_ects)) / sum(ue_ects)
+        placeholders[f"moy{ue_name}"] = f"{ue_average:.2f}"
+        logging.debug(f"UE average: {ue_average:.2f}")
+    else:
+        placeholders[f"moy{ue_name}"] = ""
+        logging.debug("No valid notes for UE average calculation")
+
+    # Determine UE state
+    if all(note >= 10 for note in ue_notes):
+        placeholders[f"etat{ue_name}"] = "VA"
+        logging.debug("UE state: VA (all notes >= 10)")
+    elif ue_average >= 10:
+        placeholders[f"etat{ue_name}"] = "VA"
+        logging.debug("UE state: VA (average >= 10)")
+        for i, note in zip(valid_indices, ue_notes):
+            if 8 <= note < 10:
+                placeholders[f"etat{i}"] = "C"
+                logging.debug(f"Compensation for index {i}: note={note:.2f}")
+    else:
+        placeholders[f"etat{ue_name}"] = "NV"
+        logging.debug("UE state: NV")
+        for i, note in zip(valid_indices, ue_notes):
+            if note < 8:
+                placeholders[f"etat{i}"] = "R"
+                logging.debug(f"Rattrapage for index {i}: note={note:.2f}")
+            elif 8 <= note < 10:
+                placeholders[f"etat{i}"] = "C"
+                logging.debug(f"Compensation for index {i}: note={note:.2f}")
+
+    # Final check to ensure no state is assigned to empty notes or hidden ECTS
+    for i in note_indices:
+        if not placeholders[f"note{i}"] or i in case_config["hidden_ects"]:
+            placeholders[f"etat{i}"] = ""
+        logging.debug(f"Final state for index {i}: Note={placeholders[f'note{i}']}, Etat={placeholders[f'etat{i}']}")
+
+def process_ue4(placeholders, note_indices, grade_column_indices, student_data, case_config):
+    ue_notes = []
+    ue_ects = []
+    for i in note_indices:
+        grade_str = str(student_data.iloc[grade_column_indices[i-1]]).strip() if pd.notna(student_data.iloc[grade_column_indices[i-1]]) else ""
+        ects_value = placeholders.get(f"ECTS{i}", "")
+        
+        placeholders[f"note{i}"] = ""
         placeholders[f"etat{i}"] = ""
 
-    # Calculate UE state based on valid notes
-    valid_ue_notes = [note for note in ue_notes if note is not None]
-    
-    if valid_ue_notes:
-        notes_between_8_and_10 = sum(8 <= note < 10 for note in valid_ue_notes)
-        notes_below_8 = sum(note < 8 for note in valid_ue_notes)
-
-        if all(note >= 10 for note in valid_ue_notes):
-            placeholders[f"etat{ue_name}"] = "VA"
-        elif notes_between_8_and_10 == 1 and notes_below_8 == 0:
-            placeholders[f"etat{ue_name}"] = "VA"
-            for i, note in zip(note_indices, valid_ue_notes):
-                if 8 <= note < 10 and placeholders[f"note{i}"] != "" and (placeholders.get(f"ECTS{i}", "") != "" and i not in case_config["hidden_ects"]):
-                    placeholders[f"etat{i}"] = "C"
-        else:
-            placeholders[f"etat{ue_name}"] = "NV"
-            for i, note in zip(note_indices, valid_ue_notes):
-                if placeholders[f"note{i}"] != "" and (placeholders.get(f"ECTS{i}", "") != "" and i not in case_config["hidden_ects"]):
-                    if note < 8 or (notes_between_8_and_10 > 1 and notes_below_8 > 0):
+        if grade_str and grade_str != 'Note' and ects_value and i not in case_config["hidden_ects"]:
+            grades_coefficients = extract_grades_and_coefficients(grade_str)
+            if grades_coefficients:
+                individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
+                if individual_average is not None:
+                    ue_notes.append(individual_average)
+                    ue_ects.append(float(ects_value))
+                    placeholders[f"note{i}"] = f"{individual_average:.2f}"
+                    if individual_average < 8:
                         placeholders[f"etat{i}"] = "R"
-                    elif 8 <= note < 10:
+                    elif 8 <= individual_average < 10:
                         placeholders[f"etat{i}"] = "C"
-    else:
-        placeholders[f"etat{ue_name}"] = ""
 
-        
-# Fonction pour générer un document Word à partir des données de l'étudiant et du template
+    if ue_notes and ue_ects:
+        ue_average = calculate_weighted_average(ue_notes, ue_ects)
+        placeholders["moyUE4"] = f"{ue_average:.2f}"
+        placeholders["etatUE4"] = "VA" if ue_average >= 10 else "NV"
+    else:
+        placeholders["moyUE4"] = ""
+        placeholders["etatUE4"] = "NV"  # Si aucune note valide, on considère l'UE comme non validée
+
+    # Vérification finale pour s'assurer qu'aucun état n'est attribué aux notes vides
+    for i in note_indices:
+        if not placeholders[f"note{i}"]:
+            placeholders[f"etat{i}"] = ""
+
+    return placeholders
+
 def generate_word_document(student_data, case_config, template_path, output_dir):
     ects_config = read_ects_config()
     current_date = datetime.now().strftime("%d/%m/%Y")
@@ -328,7 +397,7 @@ def generate_word_document(student_data, case_config, template_path, output_dir)
         process_ue_notes(placeholders, "UE1", [1, 2, 3], case_config["grade_column_indices"], student_data, case_config)
         process_ue_notes(placeholders, "UE2", [4], case_config["grade_column_indices"], student_data, case_config)
         process_ue_notes(placeholders, "UE3", [5, 6], case_config["grade_column_indices"], student_data, case_config)
-        process_ue_notes(placeholders, "UE4", [7, 8, 9, 10, 11, 12], case_config["grade_column_indices"], student_data, case_config)
+        process_ue4(placeholders, [7, 8, 9, 10, 11, 12], case_config["grade_column_indices"], student_data, case_config)
         process_ue_notes(placeholders, "UESPE", [13, 14, 15], case_config["grade_column_indices"], student_data, case_config)
 
         # Get UE1 notes, treating empty strings as None
