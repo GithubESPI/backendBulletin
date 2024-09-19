@@ -26,11 +26,20 @@ def normalize_string(s):
         s = str(s)
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').lower()
 
-# Fonction pour extraire les notes et les coefficients depuis une chaîne de caractères
+# Modifiez la fonction extract_grades_and_coefficients
 def extract_grades_and_coefficients(grade_str):
     grades_coefficients = []
-    if not grade_str.strip() or "Validé" in grade_str:
-        return grades_coefficients  # Retourne une liste vide
+    special_case = None
+
+    if "Validé ( - ASE)" in grade_str or "Non Validé ( - ASE)" in grade_str:
+        special_case = grade_str
+    elif "(CCHM)" in grade_str:
+        special_case = grade_str
+    elif not grade_str.strip() or "Validé" in grade_str:
+        return grades_coefficients, None  # Retourne une liste vide et None pour le cas spécial
+
+    if special_case:
+        return grades_coefficients, special_case
 
     parts = grade_str.split(" - ")
     for part in parts:
@@ -53,9 +62,10 @@ def extract_grades_and_coefficients(grade_str):
             grades_coefficients.append((float(grade), float(coefficient)))
         except ValueError:
             continue  # Ignorer les valeurs non numériques
-    return grades_coefficients
 
-# Fonction pour calculer la moyenne pondérée des notes
+    return grades_coefficients, None
+
+# Modifiez la fonction calculate_weighted_average pour gérer les cas spéciaux
 def calculate_weighted_average(notes, ects):
     if not notes or not ects:
         return 0.0
@@ -71,7 +81,7 @@ def calculate_weighted_average(notes, ects):
     total_grade = sum(note * ect for note, ect in zip(filtered_notes, filtered_ects))
     total_ects = sum(filtered_ects)
     
-    return total_grade / total_ects if total_ects != 0 else 0
+    return total_grade / total_ects if total_ects != 0 else 0.0
 
 # Fonction pour générer les placeholders pour le document Word
 def generate_placeholders(titles_row, case_config, student_data, current_date, ects_data):
@@ -258,14 +268,20 @@ def process_ue_notes(placeholders, ue_name, note_indices, grade_column_indices, 
         placeholders[f"note{i}"] = ""
 
         if grade_str and grade_str != 'Note' and ects_value and i not in case_config["hidden_ects"]:
-            grades_coefficients = extract_grades_and_coefficients(grade_str)
-            individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
-            if individual_average is not None:
-                ue_notes.append(individual_average)
-                ue_ects.append(float(ects_value))
-                placeholders[f"note{i}"] = f"{individual_average:.2f}"
-                valid_indices.append(i)
-                logging.debug(f"Valid note for index {i}: {individual_average:.2f}")
+            grades_coefficients, special_case = extract_grades_and_coefficients(grade_str)
+            if special_case:
+                placeholders[f"note{i}"] = special_case
+                placeholders[f"ECTS{i}"] = ""  # Ne pas attribuer d'ECTS pour les cas spéciaux
+            elif grades_coefficients:  # Vérifier si grades_coefficients n'est pas None ou vide
+                individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
+                if individual_average is not None:
+                    ue_notes.append(individual_average)
+                    ue_ects.append(float(ects_value))
+                    placeholders[f"note{i}"] = f"{individual_average:.2f}"
+                    valid_indices.append(i)
+                    logging.debug(f"Valid note for index {i}: {individual_average:.2f}")
+            else:
+                logging.debug(f"No valid grades or coefficients for index {i}")
 
     # Calculate UE average
     if ue_notes and ue_ects:
@@ -319,34 +335,45 @@ def process_ue4(placeholders, note_indices, grade_column_indices, student_data, 
         placeholders[f"etat{i}"] = ""
 
         if grade_str and grade_str != 'Note' and ects_value and i not in case_config["hidden_ects"]:
-            grades_coefficients = extract_grades_and_coefficients(grade_str)
-            if grades_coefficients:
+            grades_coefficients, special_case = extract_grades_and_coefficients(grade_str)
+            if special_case:
+                placeholders[f"note{i}"] = special_case
+                placeholders[f"ECTS{i}"] = ""  # Ne pas attribuer d'ECTS pour les cas spéciaux
+            elif grades_coefficients:
                 individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
                 if individual_average is not None:
                     ue_notes.append(individual_average)
                     placeholders[f"note{i}"] = f"{individual_average:.2f}"
                     if individual_average < 8:
                         placeholders[f"etat{i}"] = "R"
-                        placeholders[f"ECTS{i}"] = 0  # Mettre ECTS à 0 si l'état est "R"
+                        placeholders[f"ECTS{i}"] = 0  # Set ECTS to 0 when state is "R"
                     elif 8 <= individual_average < 10:
                         placeholders[f"etat{i}"] = "C"
                         ue_ects.append(float(ects_value))
                     else:
                         ue_ects.append(float(ects_value))
+            else:
+                logging.debug(f"No valid grades or coefficients for index {i}")
 
     if ue_notes and ue_ects:
         ue_average = calculate_weighted_average(ue_notes, ue_ects)
-        placeholders["moyUE4"] = f"{ue_average:.2f}"
-        placeholders["etatUE4"] = "VA" if ue_average >= 10 else "NV"
+        if ue_average is not None:
+            placeholders["moyUE4"] = f"{ue_average:.2f}"
+            placeholders["etatUE4"] = "VA" if ue_average >= 10 else "NV"
+        else:
+            placeholders["moyUE4"] = ""
+            placeholders["etatUE4"] = "NV"
     else:
         placeholders["moyUE4"] = ""
-        placeholders["etatUE4"] = "NV"  # Si aucune note valide, on considère l'UE comme non validée
+        placeholders["etatUE4"] = "NV"  # If no valid notes, consider UE as not validated
 
-    # Vérification finale pour s'assurer qu'aucun état n'est attribué aux notes vides
+    # Final check to ensure no state is assigned to empty notes
     for i in note_indices:
         if not placeholders[f"note{i}"]:
             placeholders[f"etat{i}"] = ""
-            placeholders[f"ECTS{i}"] = ""  # S'assurer que les ECTS sont vides pour les notes vides
+            placeholders[f"ECTS{i}"] = ""  # Ensure ECTS is empty for empty notes
+        elif placeholders[f"etat{i}"] == "R":
+            placeholders[f"ECTS{i}"] = 0  # Set ECTS to 0 when state is "R"
 
     return placeholders
 
@@ -424,19 +451,24 @@ def generate_word_document(student_data, case_config, template_path, output_dir)
 
     total_ects = 0  # Initialiser le total des ECTS
 
+    # Dans la fonction generate_word_document, modifiez la partie qui traite les notes
     for i, col_index in enumerate(case_config["grade_column_indices"], start=1):
         grade_str = str(student_data.iloc[col_index]).strip() if pd.notna(student_data.iloc[col_index]) else ""
         if grade_str and grade_str != 'Note':
-            grades_coefficients = extract_grades_and_coefficients(grade_str)
-            individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
-            placeholders[f"note{i}"] = f"{individual_average:.2f}" if individual_average else ""
-            if individual_average > 8 and i not in case_config["hidden_ects"]:
-                ects_value = int(ects_data.get(f"ECTS{i}", 1))  # Utiliser le coefficient par défaut 1 pour les ECTS masqués et convertir en int
-                placeholders[f"ECTS{i}"] = ects_value
-            elif individual_average > 0:
-                placeholders[f"ECTS{i}"] = 0
+            grades_coefficients, special_case = extract_grades_and_coefficients(grade_str)
+            if special_case:
+                placeholders[f"note{i}"] = special_case
+                placeholders[f"ECTS{i}"] = ""  # Ne pas attribuer d'ECTS pour les cas spéciaux
             else:
-                placeholders[f"ECTS{i}"] = ""
+                individual_average = calculate_weighted_average([g[0] for g in grades_coefficients], [g[1] for g in grades_coefficients])
+                placeholders[f"note{i}"] = f"{individual_average:.2f}" if individual_average else ""
+                if individual_average > 8 and i not in case_config["hidden_ects"]:
+                    ects_value = int(ects_data.get(f"ECTS{i}", 1))
+                    placeholders[f"ECTS{i}"] = ects_value
+                elif individual_average > 0:
+                    placeholders[f"ECTS{i}"] = 0
+                else:
+                    placeholders[f"ECTS{i}"] = ""
         else:
             placeholders[f"note{i}"] = ""
             placeholders[f"ECTS{i}"] = ""
@@ -445,17 +477,24 @@ def generate_word_document(student_data, case_config, template_path, output_dir)
     for ue, indices in case_config["ects_sum_indices"].items():
         ue_sum = 0
         ue_ects = 0
+        valid_notes_count = 0  # Initialiser valid_notes_count ici
 
         for index in indices:
-            note = float(placeholders[f"note{index}"]) if placeholders[f"note{index}"] not in ["", None] else 0
-            ects = int(placeholders[f"ECTS{index}"]) if placeholders[f"ECTS{index}"] not in ["", None] else 0
-
-            ue_sum += note * ects
-            ue_ects += ects
+            note_str = placeholders[f"note{index}"]
+            if note_str not in ["Validé ( - ASE)", "Non Validé ( - ASE)"] and not note_str.endswith("(CCHM)"):
+                try:
+                    note = float(note_str) if note_str not in ["", None] else 0
+                    ects = int(placeholders[f"ECTS{index}"]) if placeholders[f"ECTS{index}"] not in ["", None] else 0
+                    if ects != 0:
+                        ue_sum += note * ects
+                        ue_ects += ects
+                        valid_notes_count += 1
+                except ValueError:
+                    continue
 
         average_ue = math.ceil(ue_sum / ue_ects * 100) / 100 if ue_ects > 0 else 0
-        placeholders[f"moy{ue}"] = f"{average_ue:.2f}" if average_ue else ""
-        placeholders[f"ECTS{ue}"] = ue_ects  # Somme correcte des ECTS pour l'UE
+        placeholders[f"moy{ue}"] = f"{average_ue:.2f}" if average_ue and valid_notes_count > 0 else ""
+        placeholders[f"ECTS{ue}"] = ue_ects if ue_ects else ""
 
     # Calcul correct du total des ECTS
     total_ects = sum(int(placeholders[f"ECTS{ue}"]) for ue in case_config["ects_sum_indices"].keys() if placeholders[f"ECTS{ue}"] not in ["", None])
