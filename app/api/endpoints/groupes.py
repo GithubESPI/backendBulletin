@@ -6,7 +6,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_groupes():
-    endpoint_groupe = "/r/v1/formation-longue/groupes"
+    endpoint_groupe = "/r/v1/formation-longue/groupes?codesPeriode=2"
     url_groupe = f"{settings.YPAERO_BASE_URL}{endpoint_groupe}"
     headers = {
         "X-Auth-Token": settings.YPAERO_API_TOKEN,

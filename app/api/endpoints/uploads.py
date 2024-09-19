@@ -62,9 +62,9 @@ def normalize_title(title):
 # Fonction pour récupérer les données d'API en parallèle
 async def fetch_api_data_for_template(headers):
     api_urls = [
-        f"{settings.YPAERO_BASE_URL}/r/v1/formation-longue/apprenants?codePeriode=2",
-        f"{settings.YPAERO_BASE_URL}/r/v1/formation-longue/groupes",
-        f"{settings.YPAERO_BASE_URL}/r/v1/absences/01-01-2023/31-12-2024"
+        f"https://groupe-espi.ymag.cloud/index.php/r/v1/formation-longue/apprenants?codesPeriode=2",
+        f"https://groupe-espi.ymag.cloud/index.php/r/v1/formation-longue/groupes?codesPeriode=2",
+        f"https://groupe-espi.ymag.cloud/index.php/r/v1/absences/01-01-2023/31-12-2024"
     ]
 
     api_data_futures = [fetch_api_data(url, headers) for url in api_urls]
