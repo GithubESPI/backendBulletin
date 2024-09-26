@@ -1,60 +1,71 @@
 from pydantic_settings import BaseSettings  # type: ignore
 import os
 
+from pydantic_settings import BaseSettings  # type: ignore
+import os
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Upload de Bulletins"
     BASE_DIR: str = os.getcwd()
     UPLOAD_DIR: str = os.path.join(BASE_DIR, "uploads")
-    OUTPUT_DIR: str = os.path.join(BASE_DIR, "outputs")  # Assurez-vous que ce répertoire existe et est correct
-    TEMPLATE_FILE: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
-
+    OUTPUT_DIR: str = os.path.join(BASE_DIR, "outputs")
+    TEMPLATE_DIR: str = os.path.join(BASE_DIR, "template")
+    EXCEL_DIR: str = os.path.join(BASE_DIR, "excel")
     DOWNLOAD_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Downloads')
 
-    # M1-S1 excel empty
-    M1_S1_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MAPI.xlsx")
-    M1_S1_MAGI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MAGI.xlsx")
-    M1_S1_MEFIM_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MEFIM.xlsx")
-    # M1-S1 excel not empty
-    M1_S1_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S1-MAPI.xlsx")
-    M1_S1_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S1-MAGI.xlsx")
-    M1_S1_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S1-MEFIM.xlsx")
-    # M1-S1 excel bulletin
-    M1_S1_MAPI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
-    M1_S1_MAGI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
-    M1_S1_MEFIM_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
+    TEMPLATE_FILE: str = os.path.join(TEMPLATE_DIR, "modeleM1S1.docx")
+
+    # M1-S1
+    M1_S1_DIR: str = os.path.join(EXCEL_DIR, "M1-S1")
+    M1_S1_MAPI_TEMPLATE: str = os.path.join(M1_S1_DIR, "M1-S1-MAPI.xlsx")
+    M1_S1_MAGI_TEMPLATE: str = os.path.join(M1_S1_DIR, "M1-S1-MAGI.xlsx")
+    M1_S1_MEFIM_TEMPLATE: str = os.path.join(M1_S1_DIR, "M1-S1-MEFIM.xlsx")
+    M1_S1_TEMPLATE_NOT_EMPTY_DIR: str = os.path.join(TEMPLATE_DIR, "S1")
+    M1_S1_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S1_TEMPLATE_NOT_EMPTY_DIR, "M1-S1-MAPI.xlsx")
+    M1_S1_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S1_TEMPLATE_NOT_EMPTY_DIR, "M1-S1-MAGI.xlsx")
+    M1_S1_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S1_TEMPLATE_NOT_EMPTY_DIR, "M1-S1-MEFIM.xlsx")
+    M1_S1_MAPI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S1.docx")
+    M1_S1_MAGI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S1.docx")
+    M1_S1_MEFIM_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S1.docx")
 
     # M1-S2
-    M1_S2_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S2", "M1-S2-MAPI.xlsx")
-    M1_S2_MAGI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S2", "M1-S2-MAGI.xlsx")
-    M1_S2_MEFIM_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S2", "M1-S2-MEFIM.xlsx")
-    M1_S2_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S2-MAPI.xlsx")
-    M1_S2_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S2-MAGI.xlsx")
-    M1_S2_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M1-S2-MEFIM.xlsx")
-    M1_S2_MAPI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S2.docx")
-    M1_S2_MAGI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S2.docx")
-    M1_S2_MEFIM_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM1S2.docx")
+    M1_S2_DIR: str = os.path.join(EXCEL_DIR, "M1-S2")
+    M1_S2_MAPI_TEMPLATE: str = os.path.join(M1_S2_DIR, "M1-S2-MAPI.xlsx")
+    M1_S2_MAGI_TEMPLATE: str = os.path.join(M1_S2_DIR, "M1-S2-MAGI.xlsx")
+    M1_S2_MEFIM_TEMPLATE: str = os.path.join(M1_S2_DIR, "M1-S2-MEFIM.xlsx")
+    M1_S2_TEMPLATE_NOT_EMPTY_DIR: str = os.path.join(TEMPLATE_DIR, "S1")
+    M1_S2_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S2_TEMPLATE_NOT_EMPTY_DIR, "M1-S2-MAPI.xlsx")
+    M1_S2_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S2_TEMPLATE_NOT_EMPTY_DIR, "M1-S2-MAGI.xlsx")
+    M1_S2_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(M1_S2_TEMPLATE_NOT_EMPTY_DIR, "M1-S2-MEFIM.xlsx")
+    M1_S2_MAPI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S2.docx")
+    M1_S2_MAGI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S2.docx")
+    M1_S2_MEFIM_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM1S2.docx")
 
     # M2-S3
-    M2_S3_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S3", "M2-S3-MAPI.xlsx")
-    M2_S3_MAGI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S3", "M2-S3-MAGI.xlsx")
-    M2_S3_MEFIM_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S3", "M2-S3-MEFIM.xlsx")
-    M2_S3_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S3-MAPI.xlsx")
-    M2_S3_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S3-MAGI.xlsx")
-    M2_S3_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S3-MEFIM.xlsx")
-    M2_S3_MAPI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S3MAPI.docx")
-    M2_S3_MAGI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S3.docx")
-    M2_S3_MEFIM_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S3.docx")
+    M2_S3_DIR: str = os.path.join(EXCEL_DIR, "M2-S3")
+    M2_S3_MAPI_TEMPLATE: str = os.path.join(M2_S3_DIR, "M2-S3-MAPI.xlsx")
+    M2_S3_MAGI_TEMPLATE: str = os.path.join(M2_S3_DIR, "M2-S3-MAGI.xlsx")
+    M2_S3_MEFIM_TEMPLATE: str = os.path.join(M2_S3_DIR, "M2-S3-MEFIM.xlsx")
+    M2_S3_TEMPLATE_NOT_EMPTY_DIR: str = os.path.join(TEMPLATE_DIR, "S1")
+    M2_S3_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S3_TEMPLATE_NOT_EMPTY_DIR, "M2-S3-MAPI.xlsx")
+    M2_S3_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S3_TEMPLATE_NOT_EMPTY_DIR, "M2-S3-MAGI.xlsx")
+    M2_S3_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S3_TEMPLATE_NOT_EMPTY_DIR, "M2-S3-MEFIM.xlsx")
+    M2_S3_MAPI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S3MAPI.docx")
+    M2_S3_MAGI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S3.docx")
+    M2_S3_MEFIM_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S3.docx")
 
     # M2-S4
-    M2_S4_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S4", "M2-S4-MAPI.xlsx")
-    M2_S4_MAGI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S4", "M2-S4-MAGI.xlsx")
-    M2_S4_MEFIM_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M2-S4", "M2-S4-MEFIM.xlsx")
-    M2_S4_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S4-MAPI.xlsx")
-    M2_S4_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S4-MAGI.xlsx")
-    M2_S4_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(BASE_DIR, "template", "S1", "M2-S4-MEFIM.xlsx")
-    M2_S4_MAPI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S4.docx")
-    M2_S4_MAGI_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S4.docx")
-    M2_S4_MEFIM_TEMPLATE_WORD: str = os.path.join(BASE_DIR, "template", "modeleM2S4.docx")
+    M2_S4_DIR: str = os.path.join(EXCEL_DIR, "M2-S4")
+    M2_S4_MAPI_TEMPLATE: str = os.path.join(M2_S4_DIR, "M2-S4-MAPI.xlsx")
+    M2_S4_MAGI_TEMPLATE: str = os.path.join(M2_S4_DIR, "M2-S4-MAGI.xlsx")
+    M2_S4_MEFIM_TEMPLATE: str = os.path.join(M2_S4_DIR, "M2-S4-MEFIM.xlsx")
+    M2_S4_TEMPLATE_NOT_EMPTY_DIR: str = os.path.join(TEMPLATE_DIR, "S1")
+    M2_S4_MAPI_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S4_TEMPLATE_NOT_EMPTY_DIR, "M2-S4-MAPI.xlsx")
+    M2_S4_MAGI_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S4_TEMPLATE_NOT_EMPTY_DIR, "M2-S4-MAGI.xlsx")
+    M2_S4_MEFIM_TEMPLATE_NOT_EMPTY: str = os.path.join(M2_S4_TEMPLATE_NOT_EMPTY_DIR, "M2-S4-MEFIM.xlsx")
+    M2_S4_MAPI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S4.docx")
+    M2_S4_MAGI_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S4.docx")
+    M2_S4_MEFIM_TEMPLATE_WORD: str = os.path.join(TEMPLATE_DIR, "modeleM2S4.docx")
 
     # ECTS
     ECTS_JSON_PATH: str = os.path.join(BASE_DIR, "json", "ects.json")
@@ -88,8 +99,9 @@ class Settings(BaseSettings):
     YPAERO_API_TOKEN: str
 
     class Config:
-        # Chargez les variables d'environnement à partir d'un fichier .env situé à la racine du projet.
         env_file = ".env"
+
+settings = Settings()
 
 # Instanciez les paramètres pour qu'ils soient importés et utilisés dans d'autres fichiers
 settings = Settings()

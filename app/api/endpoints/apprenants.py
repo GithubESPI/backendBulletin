@@ -21,4 +21,4 @@ async def get_apprenants():
         raise http_exc
     except Exception as exc:
         # Gestion des erreurs non spécifiques
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail="Internal Server Error")

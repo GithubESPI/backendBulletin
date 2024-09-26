@@ -38,4 +38,4 @@ async def import_document(file: UploadFile = File(...), nomDocument: str = Form(
     except HTTPException as http_exc:
         raise http_exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail="Internal Server Error")

@@ -25,6 +25,8 @@ from app.services.api_service import fetch_api_data
 from app.services.excel_service import process_excel_file, update_excel_with_appreciations
 from app.utils.date_utils import sum_durations
 from starlette.websockets import WebSocketDisconnect
+from fastapi import Depends
+
 
 # Configuration du logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -63,7 +65,7 @@ def normalize_title(title):
 async def fetch_api_data_for_template(headers):
     api_urls = [
         f"https://groupe-espi.ymag.cloud/index.php/r/v1/formation-longue/apprenants?codesPeriode=2",
-        f"https://groupe-espi.ymag.cloud/index.php/r/v1/formation-longue/groupes?codesPeriode=2",
+        f"https://groupe-espi.ymag.cloud/index.php/r/v1/formation-longue/groupes",
         f"https://groupe-espi.ymag.cloud/index.php/r/v1/absences/01-01-2023/31-12-2024"
     ]
 
@@ -744,44 +746,3 @@ async def download_zip(filename: str):
     if not os.path.exists(zip_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path=zip_path, filename=filename, media_type='application/zip')
-
-
-# @router.post("/generate-document")
-# async def generate_document(doc_data: dict):
-#     try:
-#         # Extract data from request
-#         placeholders_data = doc_data.get("placeholders", {})
-#         case_config = doc_data.get("caseConfig", {})
-#         student_data = doc_data.get("studentData", {})
-#         current_date = doc_data.get("currentDate", "")
-#         ects_data = doc_data.get("ectsData", {})
-#         titles_row = case_config.get("titles_row", [])  # Extracting titles_row
-
-#         # Log for debugging
-#         logger.debug(f"Received placeholders: {placeholders_data}")
-#         logger.debug(f"Case config: {case_config}")
-#         logger.debug(f"Student data: {student_data}")
-#         logger.debug(f"Current date: {current_date}")
-#         logger.debug(f"ECTS data: {ects_data}")
-#         logger.debug(f"Titles row: {titles_row}")
-
-#         # Vérification de la taille de titles_row avant de l'utiliser
-#         if len(titles_row) < 20:
-#             raise ValueError(f"titles_row length is {len(titles_row)}, expected at least 20 elements")
-
-#         # Call your generate_placeholders function if necessary
-#         placeholders = generate_placeholders(titles_row, case_config, student_data, current_date, ects_data)
-
-#         # Use the constants for template file and output directory
-#         template_path = settings.TEMPLATE_FILE
-#         output_dir = settings.OUTPUT_DIR
-
-#         # Generate the document
-#         output = generate_word_document(placeholders, case_config, template_path, output_dir)
-
-#         # Return a successful response
-#         return {"message": "Document generated", "output_path": output}
-
-#     except Exception as e:
-#         logger.error(f"Error while generating document: {str(e)}")
-#         raise HTTPException(status_code=500, detail=str(e))

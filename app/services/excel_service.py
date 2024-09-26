@@ -209,9 +209,9 @@ def update_excel_with_appreciations(template_wb, appreciations, columns_config):
             normalized_student_name = normalize_name(student_name)
             
             # Rechercher l'appréciation normalisée dans le dictionnaire
-            for key in appreciations.keys():
+            for key, appreciation in appreciations.items():
                 if normalize_name(key) == normalized_student_name:
-                    template_ws.cell(row=row, column=appreciation_column_index).value = appreciations[key]
+                    template_ws.cell(row=row, column=appreciation_column_index).value = appreciation
                     break
             else:
                 print(f"Appreciation non trouvée pour: {student_name}")
