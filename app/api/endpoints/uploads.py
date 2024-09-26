@@ -644,7 +644,7 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
         template_wb = update_excel_with_appreciations(template_wb, appreciations, columns_config)
 
         template_name = os.path.basename(template_to_use).replace('.xlsx', '')
-        output_path = os.path.join(settings.OUTPUT_DIR, f'{template_name}.xlsx')
+        output_path = os.path.join(settings.DOCUMENTS_DIR, f'{template_name}.xlsx')
         logger.debug(f"Saving processed workbook to {output_path}")
         template_wb.save(output_path)
 
