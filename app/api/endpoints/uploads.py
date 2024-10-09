@@ -86,7 +86,6 @@ async def fetch_api_data_for_template(headers):
     return results
 
 
-
 # Fonction pour extraire les appréciations depuis un document Word
 def extract_appreciations_from_word(word_path):
     try:
@@ -424,6 +423,18 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
             "MAPI_S4": settings.M2_S4_MAPI_TEMPLATE,
             "MAGI_S4": settings.M2_S4_MAGI_TEMPLATE,
             "MEFIM_S4": settings.M2_S4_MEFIM_TEMPLATE,
+            "BG-ALT-S1": settings.BG_ALT_1_TEMPLATE,
+            "BG-ALT-S2": settings.BG_ALT_2_TEMPLATE,
+            "BG-ALT-S3": settings.BG_ALT_3_TEMPLATE,
+            "BG-ALT-S4": settings.BG_ALT_4_TEMPLATE,
+            "BG-ALT-S5": settings.BG_ALT_5_TEMPLATE,
+            "BG-ALT-S6": settings.BG_ALT_6_TEMPLATE,
+            "BG-TP-S1": settings.BG_TP_1_TEMPLATE,
+            "BG-TP-S2": settings.BG_TP_2_TEMPLATE,
+            "BG-TP-S3": settings.BG_TP_3_TEMPLATE,
+            "BG-TP-S4": settings.BG_TP_4_TEMPLATE,
+            "BG-TP-S5": settings.BG_TP_5_TEMPLATE,
+            "BG-TP-S6": settings.BG_TP_6_TEMPLATE,
         }
 
         matching_values = {
@@ -439,6 +450,8 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
             "MAPI_S4": ['UE 1 – Economie & Gestion', "Economie de l'Environnement", 'UE 3 – Aménagement & Urbanisme', "Normalisation, Labellisation", "Stratégies et Aménagement des Territoires II", 'UE 4 – Compétences Professionnalisantes', 'Real Estate English', 'Mémoire de Recherche', "Rencontres de l'Immobilier", 'ESPI Career Services', 'Immersion Professionnelle', 'UE SPE – MAPI', "Business Game Aménagement et Promotion Immobilière", "Fiscalité et Promotion Immobilière", "Contentieux de l'Urbanisme"],
             "MAGI_S4": ['UE 1 – Economie & Gestion', "Économie de l'Environnement", 'UE 3 – Aménagement & Urbanisme', "Normalisation, Labellisation", "Stratégies et Aménagement des Territoires II", 'UE 4 – Compétences Professionnalisantes', 'Real Estate English', 'Mémoire de Recherche', "Rencontres de l'Immobilier", 'ESPI Career Services', 'Immersion Professionnelle', 'UE SPE – MAGI', "Business Game Property Management", "Gestion des Centres Commerciaux", "Gestion de Contentieux et Recouvrement"],
             "MEFIM_S4": ['UE 1 – Economie & Gestion', "Economie de l'Environnement", 'UE 3 – Aménagement & Urbanisme', "Normalisation, Labellisation", "Stratégies et Aménagement des Territoires II", 'UE 4 – Compétences Professionnalisantes', 'Real Estate English', 'Mémoire de Recherche', "Rencontres de l'Immobilier", 'ESPI Career Services', 'Immersion Professionnelle', 'UE SPE – MEFIM', "Business Game Arbitrage et Stratégies d'Investissement", "Fiscalité du Patrimoine", "Fintech et Blockchain"],
+            "BG-ALT-S1": ['UE 1 – Economie & Gestion', "Économie Générale", "Outils d'Analyse Economique", "Organisations, Stratégies et Innovations I", "UE 2 – Droit", "Introduction au Droit", "Droit des Contrats", "UE 3 – Aménagement & Urbanisme", "Introduction aux Méthodes d'Analyse et de Représentation Spatiale", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Gestion du Travail", "Déontologie et Ethique Professionnelle", "ESPI Career Services", "ESPI Inside"],
+            "BG-ALT-S2": ['UE 1 – Economie & Gestion', "Microéconomie I", "Introduction à la Finance", "Marketing & Prospection", "Mathématiques Financières", "UE 2 – Droit", "Droit des Biens", "Droit de la Copropriété I", "Droit des Baux d'Habitation", "UE 3 – Aménagement & Urbanisme", "Histoire Urbaine et Architecture", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Gestion de Projet", "ESPI Career Services", "ESPI Inside"],
         }
         
         progress_data[session_id] = 30  # Progression à 30%
@@ -613,6 +626,34 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
                 'duree_retard_column_index_template': 25,
                 'appreciation_column_index_template': 26
             },
+            "BG-ALT-S1": {
+                'name_column_index_uploaded': 2,
+                'name_column_index_template': 2,
+                'code_apprenant_column_index_template': 1,
+                'date_naissance_column_index_template': 21,
+                'nom_site_column_index_template': 22,
+                'code_groupe_column_index_template': 23,
+                'nom_groupe_column_index_template': 24,
+                'etendu_groupe_column_index_template': 25,
+                'duree_justifie_column_index_template': 26,
+                'duree_non_justifie_column_index_template': 27,
+                'duree_retard_column_index_template': 28,
+                'appreciation_column_index_template': 29
+            },
+            "BG-ALT-S2": {
+                'name_column_index_uploaded': 2,
+                'name_column_index_template': 2,
+                'code_apprenant_column_index_template': 1,
+                'date_naissance_column_index_template': 22,
+                'nom_site_column_index_template': 23,
+                'code_groupe_column_index_template': 24,
+                'nom_groupe_column_index_template': 25,
+                'etendu_groupe_column_index_template': 26,
+                'duree_justifie_column_index_template': 27,
+                'duree_non_justifie_column_index_template': 28,
+                'duree_retard_column_index_template': 29,
+                'appreciation_column_index_template': 30
+            }
         }
 
         template_to_use = None

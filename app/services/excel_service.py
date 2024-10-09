@@ -130,7 +130,155 @@ def process_excel_file(file_path: str, output_dir: str) -> list:
                     'UE4': [9, 10, 11],
                 },
                 "hidden_ects": [6, 7]
-            }
+            },
+            "BG-ALT-1":{
+                "key": "BG-ALT-1",
+                "titles_row": df_titles.iloc[0, 2:20].tolist(),
+                "template_word": settings.BG_ALT_1_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 7, 8, 10, 12, 14, 15, 16, 17, 18, 19],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3],
+                    'UE2': [4, 5],
+                    'UE3': [6],
+                    'UE4': [7, 8, 9, 10, 11, 12, 13, 14],
+                },
+                "hidden_ects": [9, 10, 11, 14]
+            },
+            "BG-ALT-2":{
+                "key": "BG-ALT-2",
+                "titles_row": df_titles.iloc[0, 2:21].tolist(),
+                "template_word": settings.BG_ALT_2_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 6, 8, 9, 10, 12, 14, 15, 16, 17, 18, 19, 20],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3, 4],
+                    'UE2': [5, 6, 7],
+                    'UE3': [8],
+                    'UE4': [9, 10, 11, 12, 13, 14, 15],
+                },
+                "hidden_ects": [11, 12, 13, 14, 15]
+            },
+            "BG-ALT-3":{
+                "key": "BG-ALT-3",
+                "titles_row": df_titles.iloc[0, 2:19].tolist(),
+                "template_word": settings.BG_ALT_3_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 6, 7, 9, 10, 12, 14, 15, 16, 17, 18],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3, 4, 5],
+                    'UE2': [6, 7],
+                    'UE3': [8],
+                    'UE4': [9, 10, 11, 12, 13],
+                },
+                "hidden_ects": [4, 11, 12, 13]
+            },
+            "BG-ALT-4":{
+                "key": "BG-ALT-4",
+                "titles_row": df_titles.iloc[0, 2:18].tolist(),
+                "template_word": settings.BG_ALT_4_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 7, 8, 9, 11, 13, 14, 15, 16, 17],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3],
+                    'UE2': [4, 5, 6, 7],
+                    'UE3': [8],
+                    'UE4': [9, 10, 11, 12, 13],
+                },
+                "hidden_ects": [11, 12, 13]
+            },
+            "BG-ALT-5":{
+                "key": "BG-ALT-5",
+                "titles_row": df_titles.iloc[0, 2:20].tolist(),
+                "template_word": settings.BG_ALT_5_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 7, 8, 9, 11, 13, 14, 15, 16, 17, 18, 19],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3],
+                    'UE2': [4, 5, 6],
+                    'UE3': [7],
+                    'UE4': [8, 9, 10, 11, 12, 13, 14],
+                },
+                "hidden_ects": [10, 11, 12, 14]
+            },
+            "BG-ALT-6":{
+                "key": "BG-ALT-6",
+                "titles_row": df_titles.iloc[0, 2:18].tolist(),
+                "template_word": settings.BG_ALT_6_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 6, 7, 9, 10, 12, 13, 14, 15, 16, 17],
+                "ects_sum_indices": {
+                    'UE1': [1, 2],
+                    'UE2': [3, 4],
+                    'UE3': [5, 6],
+                    'UE4': [7, 8, 9, 10, 11, 12],
+                },
+                "hidden_ects": [9, 12]
+            },
+            "BG-TP-1":{
+                "key": "BG-TP-1",
+                "titles_row": df_titles.iloc[0, 2:28].tolist(),
+                "template_word": settings.BG_TP_1_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3, 4, 5, 6, 7],
+                    'UE2': [8, 9, 10, 11, 12],
+                    'UE3': [13, 14],
+                    'UE4': [15, 16, 17, 18, 19, 20, 21, 22],
+                },
+                "hidden_ects": [16, 17, 18, 20, 21, 22]
+            },
+            "BG-TP-2":{
+                "key": "BG-TP-2",
+                "titles_row": df_titles.iloc[0, 2:5].tolist(),
+                "template_word": settings.BG_TP_2_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4],
+                "ects_sum_indices": {
+                    'UE1': [1, 2],
+                },
+                "hidden_ects": []
+            },
+            "BG-TP-3":{
+                "key": "BG-TP-3",
+                "titles_row": df_titles.iloc[0, 2:21].tolist(),
+                "template_word": settings.BG_TP_3_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 6, 8, 9, 11, 12, 14, 15, 17, 18, 19, 20],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3, 4],
+                    'UE2': [5, 6, 7, 8, 9],
+                    'UE3': [10, 11],
+                    'UE4': [12, 13, 14, 15],
+                },
+                "hidden_ects": [13, 14, 15]
+            },
+            "BG-TP-4":{
+                "key": "BG-TP-4",
+                "titles_row": df_titles.iloc[0, 2:4].tolist(),
+                "template_word": settings.BG_TP_4_TEMPLATE_WORD,
+                "grade_column_indices": [3],
+                "ects_sum_indices": {
+                    'UE1': [1],
+                },
+                "hidden_ects": []
+            },
+            "BG-TP-5":{
+                "key": "BG-TP-5",
+                "titles_row": df_titles.iloc[0, 2:25].tolist(),
+                "template_word": settings.BG_TP_5_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5, 6, 7, 9, 11, 12, 13, 15, 17, 19, 20, 21, 22, 23, 24],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3, 4, 5],
+                    'UE2': [6, 7, 8, 9, 10],
+                    'UE3': [11, 12, 13],
+                    'UE4': [14, 15, 16, 17, 18, 19],
+                },
+                "hidden_ects": [15, 16, 18]
+            },
+            "BG-TP-6":{
+                "key": "BG-TP-6",
+                "titles_row": df_titles.iloc[0, 2:6].tolist(),
+                "template_word": settings.BG_TP_6_TEMPLATE_WORD,
+                "grade_column_indices": [3, 4, 5],
+                "ects_sum_indices": {
+                    'UE1': [1, 2, 3],
+                },
+                "hidden_ects": []
+            },
+            
         }
         
         # Vérifier l'existence du fichier téléchargé
@@ -153,6 +301,31 @@ def process_excel_file(file_path: str, output_dir: str) -> list:
             case_key = "M2_S3_MEFIM"
         elif filename in [os.path.basename(settings.M2_S4_MAPI_TEMPLATE), os.path.basename(settings.M2_S4_MAGI_TEMPLATE), os.path.basename(settings.M2_S4_MEFIM_TEMPLATE), os.path.basename(settings.M2_S4_MAPI_TEMPLATE_NOT_EMPTY), os.path.basename(settings.M2_S4_MAGI_TEMPLATE_NOT_EMPTY), os.path.basename(settings.M2_S4_MEFIM_TEMPLATE_NOT_EMPTY)]:
             case_key = "M2_S4"
+        elif filename in [os.path.basename(settings.BG_ALT_1_TEMPLATE), os.path.basename(settings.BG_ALT_1_TEMPLATE), os.path.basename(settings.BG_ALT_1_TEMPLATE), os.path.basename(settings.BG_ALT_1_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_1_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_1_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-1"
+        elif filename in [os.path.basename(settings.BG_ALT_2_TEMPLATE), os.path.basename(settings.BG_ALT_2_TEMPLATE), os.path.basename(settings.BG_ALT_2_TEMPLATE), os.path.basename(settings.BG_ALT_2_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_2_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_2_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-2"
+        elif filename in [os.path.basename(settings.BG_ALT_3_TEMPLATE), os.path.basename(settings.BG_ALT_3_TEMPLATE), os.path.basename(settings.BG_ALT_3_TEMPLATE), os.path.basename(settings.BG_ALT_3_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_3_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_3_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-3"
+        elif filename in [os.path.basename(settings.BG_ALT_4_TEMPLATE), os.path.basename(settings.BG_ALT_4_TEMPLATE), os.path.basename(settings.BG_ALT_4_TEMPLATE), os.path.basename(settings.BG_ALT_4_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_4_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_4_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-4"
+        elif filename in [os.path.basename(settings.BG_ALT_5_TEMPLATE), os.path.basename(settings.BG_ALT_5_TEMPLATE), os.path.basename(settings.BG_ALT_5_TEMPLATE), os.path.basename(settings.BG_ALT_5_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_5_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_5_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-5"
+        elif filename in [os.path.basename(settings.BG_ALT_6_TEMPLATE), os.path.basename(settings.BG_ALT_6_TEMPLATE), os.path.basename(settings.BG_ALT_6_TEMPLATE), os.path.basename(settings.BG_ALT_6_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_6_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_ALT_6_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-ALT-6"
+        elif filename in [os.path.basename(settings.BG_TP_1_TEMPLATE), os.path.basename(settings.BG_TP_1_TEMPLATE), os.path.basename(settings.BG_TP_1_TEMPLATE), os.path.basename(settings.BG_TP_1_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_1_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_1_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-1"
+        elif filename in [os.path.basename(settings.BG_TP_2_TEMPLATE), os.path.basename(settings.BG_TP_2_TEMPLATE), os.path.basename(settings.BG_TP_2_TEMPLATE), os.path.basename(settings.BG_TP_2_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_2_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_2_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-2"
+        elif filename in [os.path.basename(settings.BG_TP_3_TEMPLATE), os.path.basename(settings.BG_TP_3_TEMPLATE), os.path.basename(settings.BG_TP_3_TEMPLATE), os.path.basename(settings.BG_TP_3_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_3_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_3_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-3"
+        elif filename in [os.path.basename(settings.BG_TP_4_TEMPLATE), os.path.basename(settings.BG_TP_4_TEMPLATE), os.path.basename(settings.BG_TP_4_TEMPLATE), os.path.basename(settings.BG_TP_4_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_4_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_4_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-4"
+        elif filename in [os.path.basename(settings.BG_TP_5_TEMPLATE), os.path.basename(settings.BG_TP_5_TEMPLATE), os.path.basename(settings.BG_TP_5_TEMPLATE), os.path.basename(settings.BG_TP_5_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_5_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_5_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-5"
+        elif filename in [os.path.basename(settings.BG_TP_5_TEMPLATE), os.path.basename(settings.BG_TP_6_TEMPLATE), os.path.basename(settings.BG_TP_6_TEMPLATE), os.path.basename(settings.BG_TP_6_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_6_TEMPLATE_NOT_EMPTY), os.path.basename(settings.BG_TP_6_TEMPLATE_NOT_EMPTY)]:
+            case_key = "BG-TP-6"
+        
         else:
             raise HTTPException(status_code=400, detail="Unknown Excel template")
 

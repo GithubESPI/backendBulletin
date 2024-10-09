@@ -1,5 +1,5 @@
 import logging
-from app.api.endpoints import apprenants, groupes, absences, uploads, importBulletin, codeRepertoire
+from app.api.endpoints import uploads, importBulletin
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,12 +19,13 @@ app.add_middleware(
 )
 
 # Inclusion des routes des différents modules
-app.include_router(apprenants.router, prefix="/apprenants", tags=["apprenants"])
-app.include_router(groupes.router, prefix="/groupes", tags=["groupes"])
-app.include_router(absences.router, prefix="/absences", tags=["absences"])
 app.include_router(uploads.router, prefix="", tags=["uploads"])  # Uploads sans préfixe
 app.include_router(importBulletin.router, prefix="/importBulletins", tags=["importBulletins"])
-app.include_router(codeRepertoire.router, prefix="/codeRepertoire", tags=["codeRepertoire"])
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Bonjour"}
 
 # Pour lancer l'application en production, utilisez la commande suivante :
 # gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app
