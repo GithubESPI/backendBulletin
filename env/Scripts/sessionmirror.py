@@ -1,4 +1,4 @@
-#!C:\Users\AndyVESPUCE\bulletin-espi\backend\env\Scripts\python.exe
+#!C:\Users\AndyVESPUCE\Desktop\bulletin-espi\backend\env\Scripts\python.exe
 '''
 The MIT License (MIT)
 
