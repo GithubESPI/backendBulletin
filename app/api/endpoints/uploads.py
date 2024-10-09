@@ -5,19 +5,16 @@ import zipfile  # Assurez-vous d'importer le module zipfile standard
 
 # Importation des modules nécessaires
 import asyncio
-from app.services.word_service import generate_placeholders, generate_word_document
 import fitz  # PyMuPDF
 from docx2pdf import convert
-from fastapi import FastAPI, File, HTTPException, APIRouter, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, HTTPException, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, FileResponse
 from openpyxl import load_workbook
 from app.core.config import settings
 import openpyxl
-from openpyxl.utils.exceptions import InvalidFileException
 from docx import Document
 import os
 import logging
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 
@@ -25,7 +22,7 @@ from app.services.api_service import fetch_api_data
 from app.services.excel_service import process_excel_file, update_excel_with_appreciations
 from app.utils.date_utils import sum_durations
 from starlette.websockets import WebSocketDisconnect
-from fastapi import Depends
+
 
 
 # Configuration du logging

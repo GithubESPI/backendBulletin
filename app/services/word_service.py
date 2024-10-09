@@ -1,14 +1,12 @@
 import logging
 import json
 from datetime import datetime
-from fastapi import HTTPException
 import pandas as pd
 from docxtpl import DocxTemplate
 from app.core.config import settings
 import os
 import unicodedata
 import math
-import docx
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 

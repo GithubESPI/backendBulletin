@@ -5,7 +5,6 @@ from fastapi import HTTPException
 from app.core.config import settings
 from app.services.word_service import generate_word_document
 import os
-import openpyxl
 
 # Configure logging
 logger = logging.getLogger(__name__)

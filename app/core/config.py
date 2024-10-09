@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings  # type: ignore
+from pydantic_settings import BaseSettings
 import os
 
 class Settings(BaseSettings):
