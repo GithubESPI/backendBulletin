@@ -17,6 +17,7 @@ import os
 import logging
 from pydantic import BaseModel
 import requests
+import subprocess
 
 from app.services.api_service import fetch_api_data
 from app.services.excel_service import process_excel_file, update_excel_with_appreciations
@@ -188,6 +189,7 @@ def import_document_to_yparéo(file_path, code_apprenant, retries=3, delay=5):
 # Fonction pour traiter le fichier téléchargé et intégrer les données dans un template
 async def process_file(uploaded_wb, template_path, columns_config, websocket=None):
     try:
+        logger.debug(f"Trying to load Excel file from: {template_path}")
         template_wb = openpyxl.load_workbook(template_path, data_only=True)
         uploaded_ws = uploaded_wb.active
         template_ws = template_wb.active
@@ -317,6 +319,15 @@ async def process_file(uploaded_wb, template_path, columns_config, websocket=Non
         logger.error("Failed to process the file", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+def convert_docx_to_pdf(docx_dir):
+    for filename in os.listdir(docx_dir):
+        if filename.endswith('.docx'):
+            docx_path = os.path.join(docx_dir, filename)
+            pdf_path = os.path.join(docx_dir, filename.replace('.docx', '.pdf'))
+            command = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', docx_dir, docx_path]
+            subprocess.run(command, check=True)
+            logger.info(f"Converted {docx_path} to {pdf_path}")
+
 async def update_progress(session_id: str, progress: int):
     # Mise à jour de la variable globale
     progress_data[session_id] = progress
@@ -366,11 +377,14 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
     try:
         progress_data[session_id] = 5  # Progression à 5%
         await update_progress(session_id, 5)
+        
         excel_response = requests.get(doc_urls.excelUrl)
         if excel_response.status_code != 200:
             logger.error(f"Failed to download Excel document: {excel_response.status_code}")
             raise HTTPException(status_code=400, detail="Failed to download Excel document")
 
+        # Assurez-vous que le répertoire existe avant d'essayer d'y écrire le fichier.
+        os.makedirs(settings.DOWNLOAD_DIR, exist_ok=True)
 
         temp_excel_path = os.path.join(settings.DOWNLOAD_DIR, f"{doc_urls.sessionId}.xlsx")
         with open(temp_excel_path, 'wb') as temp_excel_file:
@@ -696,7 +710,7 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
 
         logger.debug(f"Generated bulletins: {bulletin_paths}")
         
-        convert(output_dir)
+        convert_docx_to_pdf(output_dir)
         
         progress_data[session_id] = 70  # Progression à 55%
         await update_progress(session_id, 70)
@@ -784,3 +798,4 @@ async def download_zip(filename: str):
     if not os.path.exists(zip_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path=zip_path, filename=filename, media_type='application/zip')
+

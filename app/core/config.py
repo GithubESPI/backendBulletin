@@ -3,13 +3,16 @@ import os
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Upload de Bulletins"
-    BASE_DIR: str = os.getcwd()
-    DOCUMENTS_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Documents')
+    BASE_DIR: str = os.getenv('BASE_DIR', os.getcwd())
+
+    # DOCUMENTS_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Documents')
+    DOCUMENTS_DIR: str = os.path.join(BASE_DIR, 'documents')
     OUTPUT_DIR: str = os.path.join(DOCUMENTS_DIR, "outputs")
     TEMPLATE_FILE: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
 
-    DOWNLOAD_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Downloads')
-
+    #DOWNLOAD_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Downloads')
+    DOWNLOAD_DIR: str = os.path.join(BASE_DIR, 'downloads')
+    
     # M1-S1 excel empty
     M1_S1_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MAPI.xlsx")
     M1_S1_MAGI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MAGI.xlsx")
@@ -139,6 +142,7 @@ class Settings(BaseSettings):
     RELEVANT_GROUPS_ALT_3: list = [ "B-BG3 ALT 1", "B-BG3 ALT 2", "L-BG3 ALT 1", "L-BG3 ALT 2",  "LI-BG3 ALT",  
     "M-BG3 ALT 1", "M-BG3 ALT 2", "M-BG3 ALT 3", "M-BG3 ALT 3", "MP-BG1 ALT",  "MP-BG3 ALT", "N-BG3 ALT 1", "N-BG3 ALT 2", "N-BG3 ALT 3",  "P-BG3 ALT 1",
         "P-BG3 ALT 2", "P-BG3 ALT 3", "P-BG3 ALT 4", "P-BG3 ALT 5", "P-BG3 ALT 6", "P-BG3 ALT 7", "P-BG3 ALT 8"]
+    
     # Paramètres d'API externe
     YPAERO_BASE_URL: str
     YPAERO_API_TOKEN: str
@@ -149,3 +153,4 @@ class Settings(BaseSettings):
 
 # Instanciez les paramètres pour qu'ils soient importés et utilisés dans d'autres fichiers
 settings = Settings()
+
