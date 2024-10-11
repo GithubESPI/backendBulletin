@@ -50,7 +50,7 @@ jobs:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -74,9 +74,3 @@ jobs:
         with:
           app-name: "backbulletin"
           slot-name: "Production"
-
-      - name: Set environment variables on Azure
-        run: |
-          az webapp config appsettings set --name backbulletin --resource-group myResourceGroup --settings YPAERO_BASE_URL=${{ secrets.YPAERO_BASE_URL }} YPAERO_API_TOKEN=${{ secrets.YPAERO_API_TOKEN }}
-        env:
-          AZURE_WEBAPP_NAME: backbulletin
