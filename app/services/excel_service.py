@@ -279,7 +279,6 @@ def process_excel_file(file_path: str, output_dir: str) -> list:
             },
             
         }
-        logger.debug(f"Selected template: {case_config['key']}")
         
         # Vérifier l'existence du fichier téléchargé
         if not os.path.exists(file_path):

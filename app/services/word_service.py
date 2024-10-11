@@ -88,7 +88,6 @@ def calculate_weighted_average(notes, ects):
 # Fonction pour générer les placeholders pour le document Word
 def generate_placeholders(titles_row, case_config, student_data, current_date, ects_data):
     logger.debug(f"Received ECTS data: {ects_data}")
-    logger.debug(f"Extracted titles: {titles_row}")  # Log pour vérifier les titres extraits
     placeholders = {
         "nomApprenant": student_data["Nom"],
         "etendugroupe": student_data["Étendu Groupe"],
@@ -102,8 +101,6 @@ def generate_placeholders(titles_row, case_config, student_data, current_date, e
         "appreciations": student_data["Appreciations"],
         "CodeApprenant": student_data["CodeApprenant"]
     }
-
-    logger.debug(f"Placeholders before update: {placeholders}")
 
     # Mise à jour des placeholders en fonction de la clé du cas
     if case_config["key"] == "M1_S1":
@@ -231,8 +228,6 @@ def generate_placeholders(titles_row, case_config, student_data, current_date, e
             "matiere10": titles_row[13],
             "matiere11": titles_row[14],
         })
-
-    logger.debug(f"Placeholders after update: {placeholders}")  # Log pour vérifier les placeholders après mise à jour
 
     # Ajouter les valeurs ECTS aux placeholders, en masquant celles spécifiées
     for i in range(1, 17):

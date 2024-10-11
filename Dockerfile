@@ -22,5 +22,5 @@ COPY ./json /code/json
 RUN mkdir -p /code/documents /code/downloads
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "443"]
 

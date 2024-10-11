@@ -463,6 +463,16 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
             "MEFIM_S4": ['UE 1 – Economie & Gestion', "Economie de l'Environnement", 'UE 3 – Aménagement & Urbanisme', "Normalisation, Labellisation", "Stratégies et Aménagement des Territoires II", 'UE 4 – Compétences Professionnalisantes', 'Real Estate English', 'Mémoire de Recherche', "Rencontres de l'Immobilier", 'ESPI Career Services', 'Immersion Professionnelle', 'UE SPE – MEFIM', "Business Game Arbitrage et Stratégies d'Investissement", "Fiscalité du Patrimoine", "Fintech et Blockchain"],
             "BG-ALT-S1": ['UE 1 – Economie & Gestion', "Économie Générale", "Outils d'Analyse Economique", "Organisations, Stratégies et Innovations I", "UE 2 – Droit", "Introduction au Droit", "Droit des Contrats", "UE 3 – Aménagement & Urbanisme", "Introduction aux Méthodes d'Analyse et de Représentation Spatiale", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Gestion du Travail", "Déontologie et Ethique Professionnelle", "ESPI Career Services", "ESPI Inside"],
             "BG-ALT-S2": ['UE 1 – Economie & Gestion', "Microéconomie I", "Introduction à la Finance", "Marketing & Prospection", "Mathématiques Financières", "UE 2 – Droit", "Droit des Biens", "Droit de la Copropriété I", "Droit des Baux d'Habitation", "UE 3 – Aménagement & Urbanisme", "Histoire Urbaine et Architecture", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Gestion de Projet", "ESPI Career Services", "ESPI Inside"],
+            "BG-ALT-S3": ['UE 1 – Economie & Gestion', "Microéconomie II", "Organisations, Stratégies et Innovations II", "Pratique de Gestion Locative I", "Enjeux de l’Immobilier et Solutions Digitales I", "Transactions Résidentielles", "UE 2 – Droit", "Droit de la Vente Immobilière", "Droit de la Copropriété II", "UE 3 – Aménagement & Urbanisme", "Technologie du Bâtiment", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "ESPI Inside"],
+            "BG-ALT-S4": ['UE 1 – Economie & Gestion', "Marketing Digital & Environnemental", "Enjeux de l'Immobilier et Solutions Digitales II", "Macroéconomie et Politiques Economiques", "UE 2 – Droit", "Droit du Numérique", "Droit de l’Urbanisme", "Fiscalité Générale", "UE 3 – Aménagement & Urbanisme", "Immobilier et Dynamiques Urbaines", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "ESPI Inside"],
+            "BG-ALT-S5": ['UE 1 – Economie & Gestion', "Économie Urbaine", "Pratique de Gestion Locative II", "Management de Projet Immobilier", "UE 2 – Droit", "Droit de la Transaction Immobilière", "Droit de l'Environnement", "Fiscalité Immobilière", "UE 3 – Aménagement & Urbanisme", "Habitat et Développement Durable", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Atelier Urbain I", "Méthodologie de la Recherche", "ESPI Inside"],
+            "BG-ALT-S6": ['UE 1 – Economie & Gestion', "Finance Immobilière", "Économie Immobilière", "UE 2 – Droit", "Gestion de la Copropriété", "Droit des Sols et de la Construction", "UE 3 – Aménagement & Urbanisme", "Pathologie du Bâtiment et Suivi de Travaux", "Expertise et Evaluation Immobilière", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Atelier Urbain II", "Panorama de l'Immobilier", "Mémoire de Recherche", "Real Estate English", "ESPI Inside"],
+            "BG-TP-1": ['UE 1 – Economie & Gestion', "Économie Générale", "Outils d'Analyse Economique", "Organisations, Stratégies et Innovations I", "Microéconomie I", "Introduction à la Finance", "Marketing & Prospection", "Mathématiques Financières",  "UE 2 – Droit", "Introduction au Droit", "Droit des Contrats", "Droit des Biens", "Droit de la Copropriété I", "Droit des Baux d'Habitation", "UE 3 – Aménagement & Urbanisme", "Introduction aux Méthodes d'Analyse et de Représentation Spatiale", "Histoire Urbaine et Architecture", "UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Gestion du Travail", "Déontologie et Ethique Professionnelle", "ESPI Career Services", "Gestion de Projet" "ESPI Inside"],
+            "BG-TP-2": ['UE 4 – Compétences Professionnalisantes', "Immersion Professionnelle", "Real Estate English & TOEFL"],
+            "BG-TP-3": ['UE 1 – Economie & Gestion', "Microéconomie II", "Organisations, Stratégies et Innovations II", "Pratique de Gestion Locative I", "Transactions Résidentielles", "UE 2 – Droit", "Droit de la Vente Immobilière", "Droit de la Copropriété II", "Droit de l'Urbanisme", "Droit des Baux Commerciaux", "Droit des Baux d'Habitation", "Fiscalité Générale", "UE 3 – Aménagement & Urbanisme", "Technologie du Bâtiment", "Histoire Urbaine et Architecture", "Immobilier et Dynamiques Urbaines", "UE 4 – Compétences Professionnalisantes", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "ESPI Inside"],
+            "BG-TP-4": ["UE 4 – Compétences Professionnalisantes", "Mobilité Internationale Études"], 
+            "BG-TP-5": ['UE 1 – Economie & Gestion', "Économie Urbaine", "Pratique de Gestion Locative II", "Management de Projet Immobilier", "Finance Immobilière", "UE 2 – Droit", "Droit de la Transaction Immobilière", "Droit de l'Environnement", "Fiscalité Immobilière", "Gestion de la Copropriété", "Droit des Sols et de la Construction", "UE 3 – Aménagement & Urbanisme", "Habitat et Développement Durable", "Pathologie du Bâtiment et Suivi de Travaux", "Expertise et Evaluation Immobiliere", "UE 4 – Compétences Professionnalisantes", "Real Estate English", "Panorama de l'Immobilier", "Expression Ecrite et Orale", "Méthodologie de la Recherche", "ESPI Inside", "Atelier Urbain"],
+            "BG-TP-6": ["UE 4 – Compétences Professionnalisantes", "Immersion Professionnelle", "Mémoire de Recherche", "Real Estate English"],
         }
         
         progress_data[session_id] = 30  # Progression à 30%
@@ -652,6 +662,20 @@ async def upload_and_integrate(doc_urls: DocumentUrls):
                 'appreciation_column_index_template': 29
             },
             "BG-ALT-S2": {
+                'name_column_index_uploaded': 2,
+                'name_column_index_template': 2,
+                'code_apprenant_column_index_template': 1,
+                'date_naissance_column_index_template': 22,
+                'nom_site_column_index_template': 23,
+                'code_groupe_column_index_template': 24,
+                'nom_groupe_column_index_template': 25,
+                'etendu_groupe_column_index_template': 26,
+                'duree_justifie_column_index_template': 27,
+                'duree_non_justifie_column_index_template': 28,
+                'duree_retard_column_index_template': 29,
+                'appreciation_column_index_template': 30
+            }, 
+            "BG-ALT-S3": {
                 'name_column_index_uploaded': 2,
                 'name_column_index_template': 2,
                 'code_apprenant_column_index_template': 1,
