@@ -20,16 +20,16 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-      
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
@@ -47,10 +47,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -61,7 +61,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -69,10 +68,15 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2B564AD45AFD4ABE83CCFF032DE18E5A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8C39FA62C28542AAA7E2D406A2DF3181 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: "Deploy to Azure Web App"
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'backbulletin'
-          slot-name: 'Production'
-          
+          app-name: "backbulletin"
+          slot-name: "Production"
+
+      - name: Set environment variables on Azure
+        run: |
+          az webapp config appsettings set --name backbulletin --resource-group myResourceGroup --settings YPAERO_BASE_URL=${{ secrets.YPAERO_BASE_URL }} YPAERO_API_TOKEN=${{ secrets.YPAERO_API_TOKEN }}
+        env:
+          AZURE_WEBAPP_NAME: backbulletin
