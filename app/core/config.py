@@ -3,15 +3,13 @@ import os
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Upload de Bulletins"
-    BASE_DIR: str = os.getenv('BASE_DIR', os.getcwd())
+    BASE_DIR: str = os.getcwd()
 
-    # DOCUMENTS_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Documents')
-    DOCUMENTS_DIR: str = os.path.join(BASE_DIR, 'documents')
+    DOCUMENTS_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Documents')
     OUTPUT_DIR: str = os.path.join(DOCUMENTS_DIR, "outputs")
     TEMPLATE_FILE: str = os.path.join(BASE_DIR, "template", "modeleM1S1.docx")
 
-    #DOWNLOAD_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Downloads')
-    DOWNLOAD_DIR: str = os.path.join(BASE_DIR, 'downloads')
+    DOWNLOAD_DIR: str = os.path.join(os.getenv('USERPROFILE', os.getenv('HOME')), 'Downloads')
     
     # M1-S1 excel empty
     M1_S1_MAPI_TEMPLATE: str = os.path.join(BASE_DIR, "excel", "M1-S1", "M1-S1-MAPI.xlsx")

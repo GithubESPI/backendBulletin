@@ -320,14 +320,26 @@ async def process_file(uploaded_wb, template_path, columns_config, websocket=Non
         raise HTTPException(status_code=500, detail=str(e))
 
 def convert_docx_to_pdf(docx_dir):
+    libreoffice_path = 'C:\\Program Files\\LibreOffice\\program\\soffice.exe'  # Remplacez par le chemin correct de LibreOffice
+
     for filename in os.listdir(docx_dir):
         if filename.endswith('.docx'):
             docx_path = os.path.join(docx_dir, filename)
             pdf_path = os.path.join(docx_dir, filename.replace('.docx', '.pdf'))
-            command = ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', docx_dir, docx_path]
-            subprocess.run(command, check=True)
-            logger.info(f"Converted {docx_path} to {pdf_path}")
 
+            command = [libreoffice_path, '--headless', '--convert-to', 'pdf', '--outdir', docx_dir, docx_path]
+
+            try:
+                subprocess.run(command, check=True)
+                if os.path.exists(pdf_path):
+                    logger.info(f"Converted {docx_path} to {pdf_path}")
+                else:
+                    logger.error(f"PDF not created for: {docx_path}")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Failed to convert {docx_path} to PDF: {e}")
+            except FileNotFoundError as e:
+                logger.error(f"LibreOffice executable not found: {e}")
+                
 async def update_progress(session_id: str, progress: int):
     # Mise à jour de la variable globale
     progress_data[session_id] = progress
