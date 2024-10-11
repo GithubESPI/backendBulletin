@@ -7,7 +7,7 @@ import zipfile  # Assurez-vous d'importer le module zipfile standard
 import asyncio
 import fitz  # PyMuPDF
 from docx2pdf import convert
-from fastapi import FastAPI, File, HTTPException, APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, FileResponse
 from openpyxl import load_workbook
 from app.core.config import settings
