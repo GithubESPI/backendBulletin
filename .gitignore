@@ -1,5 +1,4 @@
 # Exclude virtual environment
 env/
 
-# Exclude environment variables file
 .env

@@ -75,13 +75,13 @@ async def fetch_api_data_for_template(headers):
         elif isinstance(result, dict):  # Assuming the result is a dictionary
             logger.debug(f"API response from {api_urls[i]}: {result}")
         else:
-            logger.debug(f"API response from {api_urls[i]}: {result.status_code}, {result.text}")  # Log de la réponse
+            logger.error(f"Unexpected response from {api_urls[i]}: {type(result)}")  # Handle any unexpected response types
 
+    # Check if any result is an exception
     if any(isinstance(result, Exception) for result in results):
         raise HTTPException(status_code=500, detail="Failed to fetch API data")
 
     return results
-
 
 # Fonction pour extraire les appréciations depuis un document Word
 def extract_appreciations_from_word(word_path):
@@ -110,31 +110,20 @@ def log_excel_data(worksheet):
 
 def extract_code_apprenant(pdf_path: str) -> str:
     try:
-        # Ouvrir le document PDF
         with fitz.open(pdf_path) as pdf_document:
-            # Parcourir chaque page du document
             for page_num in range(pdf_document.page_count):
                 page = pdf_document.load_page(page_num)
                 text = page.get_text("text")
-                logger.info(f"Extracted text from {pdf_path}: {text}")
-                
-                # Split le texte en lignes pour trouver la ligne contenant "Identifiant :"
                 lines = text.split('\n')
                 for line in lines:
                     if "Identifiant :" in line:
-                        logger.info(f"Identifiant line found: {line}")
                         parts = line.split("Identifiant :")
-                        
                         if len(parts) > 1:
                             code_apprenant = parts[1].strip()
-                            logger.info(f"Extracted code_apprenant: {code_apprenant}")
-                            
                             if code_apprenant.replace('.', '', 1).isdigit():
                                 return str(int(float(code_apprenant)))
-
-                        logger.error(f"No valid code_apprenant found in line: {line}")
-                        return None
-    
+        logger.error(f"No valid code_apprenant found in {pdf_path}")
+        return None
     except Exception as e:
         logger.error(f"Failed to extract code_apprenant from {pdf_path}", exc_info=True)
         return None
@@ -319,7 +308,7 @@ async def process_file(uploaded_wb, template_path, columns_config, websocket=Non
         raise HTTPException(status_code=500, detail=str(e))
 
 def convert_docx_to_pdf(docx_dir):
-    libreoffice_path = 'C:\\Program Files\\LibreOffice\\program\\soffice.exe'  # Remplacez par le chemin correct de LibreOffice
+    libreoffice_path = 'soffice' # Remplacez par le chemin correct de LibreOffice
 
     for filename in os.listdir(docx_dir):
         if filename.endswith('.docx'):
